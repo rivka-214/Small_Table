@@ -5,7 +5,7 @@ from .models import Package, PackageCategory, PackageCategoryItem
 
 class PackageCategoryItemInline(admin.TabularInline):
     """
-    אינליין לפריטים בקטגוריה בתוך חבילה
+    Inline for category items within a package
     """
     model = PackageCategoryItem
     extra = 1
@@ -43,7 +43,7 @@ class PackageCategoryInline(admin.StackedInline):
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     """
-    ממשק ניהול לחבילות
+    Package management interface
     """
 
     list_display = [
@@ -97,7 +97,7 @@ class PackageAdmin(admin.ModelAdmin):
 @admin.register(PackageCategory)
 class PackageCategoryAdmin(admin.ModelAdmin):
     """
-    ניהול קטגוריות חבילה
+    Package category management
     """
 
     list_display = [
@@ -145,7 +145,7 @@ class PackageCategoryAdmin(admin.ModelAdmin):
 @admin.register(PackageCategoryItem)
 class PackageCategoryItemAdmin(admin.ModelAdmin):
     """
-    ניהול פריטים בקטגוריות חבילה
+    Manage items in package categories
     """
 
     list_display = [

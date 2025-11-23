@@ -21,7 +21,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter  # מיון
     ]
 
-    # חיפוש טקסט חופשי
+
     search_fields = [
         'product_name',
         'description',
@@ -39,7 +39,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     ordering = ['-created_at']  # ברירת מחדל: חדשים ראשון
 
-    # סינון מדויק
+
     filterset_fields = {
         'category': ['exact', 'icontains'],
 
@@ -47,9 +47,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         'vendor': ['exact']
     }
 
-    # ──────────────────────────────────────────────────────────
-    #  הרשאות דינמיות לפי פעולה
-    # ──────────────────────────────────────────────────────────
     def get_permissions(self):
         """
         הרשאות משתנות לפי סוג הפעולה
@@ -68,9 +65,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
-    # ──────────────────────────────────────────────────────────
-    # סינון חכם של QuerySet
-    # ──────────────────────────────────────────────────────────
     def get_queryset(self):
         """
         סינון מוצרים לפי פרמטרים נוספים
@@ -83,14 +77,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(is_available=True)
         return queryset
 
-    # ──────────────────────────────────────────────────────────
-    # ️ יצירת מוצר חדש
-    # ──────────────────────────────────────────────────────────
     def create(self, request, *args, **kwargs):
-        """
-        יצירת מוצר חדש עם וולידציה
-        """
-        # בדיקה שהמשתמש הוא ספק
         try:
             vendor_profile = request.user.vendor_profile
         except:
@@ -105,28 +92,16 @@ class ProductViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        """
-        שמירת מוצר חדש
-        """
-        product = serializer.save()
-        print(f"✅ מוצר חדש: {product.product_name} (ספק: {product.vendor.business_name})")
 
-    # ──────────────────────────────────────────────────────────
-    #  עדכון מוצר
-    # ──────────────────────────────────────────────────────────
+        product = serializer.save()
+        print(f"מוצר חדש: {product.product_name} (ספק: {product.vendor.business_name})")
+
     def perform_update(self, serializer):
-        """
-        עדכון מוצר קיים
-        """
-        product = serializer.save()
-        print(f"✏️ מוצר עודכן: {product.product_name}")
 
-    # ──────────────────────────────────────────────────────────
-    #  מחיקת מוצר
-    # ──────────────────────────────────────────────────────────
+        product = serializer.save()
+        print(f"️ מוצר עודכן: {product.product_name}")
+
     def perform_destroy(self, instance):
-        """
-        מחיקת מוצר
-        """
+
         print(f" מוצר נמחק: {instance.product_name} (ID: {instance.id})")
         instance.delete()

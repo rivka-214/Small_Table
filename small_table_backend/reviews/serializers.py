@@ -7,11 +7,10 @@ from orders.models import Order
 
 class ReviewSerializer(serializers.ModelSerializer):
     """
-    Serializer לחוות דעת:
-    - ביצירה: הלקוח שולח order_id, rating, title, comment
-      (user ו-vendor נגזרים מההזמנה)
+    Serializer for reviews:
+    - On creation: customer sends order_id, rating, title, comment
+    (user and vendor are derived from the order)
     """
-
     user_name = serializers.CharField(source='user.username', read_only=True)
     vendor_name = serializers.CharField(source='vendor.business_name', read_only=True)
     package_name = serializers.CharField(source='order.package.name', read_only=True)
@@ -61,11 +60,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         if user is None or not user.is_authenticated:
             raise serializers.ValidationError("משתמש לא מחובר.")
 
-        # רק מי שביצע את ההזמנה יכול להשאיר חוות דעת
         if order.user_id != user.id:
             raise serializers.ValidationError("ניתן לכתוב חוות דעת רק על הזמנה שייכת אליך.")
 
-        # לא לאפשר שתי חוות דעת על אותה הזמנה
         if hasattr(order, 'review') and self.instance is None:
             raise serializers.ValidationError("כבר קיימת חוות דעת להזמנה זו.")
 
@@ -73,11 +70,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        """
-        יצירת חוות דעת:
-        - user מתוך request
-        - vendor מתוך order.vendor
-        """
+
         request = self.context.get('request')
         user = getattr(request, 'user', None)
         order = validated_data['order']
@@ -90,10 +83,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        """
-        עדכון חוות דעת קיימת (רק ע"י הלקוח או אדמין):
-        - לא משנים user/vendor/order
-        """
+
         validated_data.pop('user', None)
         validated_data.pop('vendor', None)
         validated_data.pop('order', None)

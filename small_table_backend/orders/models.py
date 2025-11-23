@@ -10,14 +10,7 @@ from addons.models import Addon  # חשוב: חיבור לתוספות
 
 
 class Order(models.Model):
-    """
-    הזמנה המבוססת על חבילה מוכנה בלבד.
 
-    חישוב מחיר לפי האפיון:
-    - base = package.price_per_person * guests_count
-    - extras_from_items = guests_count * סכום extra_price_per_person של כל המנות המשודרגות
-    - addons_total = סכום subtotal של כל התוספות שנבחרו להזמנה
-    """
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -84,17 +77,16 @@ class Order(models.Model):
 
     def calculate_total_price(self) -> Decimal:
         """
-        חישוב סכום כולל לפי האפיון:
-        base = מחיר חבילה למנה * מספר סועדים
-        extras_from_items = guests_count * extra_price_per_person על כל פריט משודרג
-        addons_total = סכום subtotal של כל OrderAddon
+        Calculate total amount by specification:
+        base = package price per portion * number of diners
+        extras_from_items = guests_count * extra_price_per_person for each upgraded item
+        addons_total = subtotal amount of each OrderAddon
         """
         if not self.package or not self.guests_count:
             return Decimal('0.00')
 
         guests = Decimal(self.guests_count)
 
-        # בסיס – חבילה * מספר סועדים
         base = self.package.price_per_person * guests
 
         # תוספות ממנות משודרגות (אסאדו וכד')
@@ -102,7 +94,7 @@ class Order(models.Model):
         for item in self.items.all():
             extras_from_items += item.extra_price_per_person * guests
 
-        # תוספות מהטבלת OrderAddon
+        # Addons from the OrderAddon table
         addons_total = Decimal('0.00')
         for oa in self.addons.all():  # related_name='addons'
             addons_total += oa.subtotal
@@ -121,8 +113,8 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     """
-    פריט הזמנה – מבוסס על מוצר שנמצא בתוך קטגוריה בחבילה.
-    שומר את תוספת המחיר למנה (אם משודרגת) בזמן ההזמנה.
+    Order item – based on a product within a category in a package.
+    Saves the additional price per portion (if upgraded) at the time of ordering.
     """
 
     order = models.ForeignKey(
@@ -146,13 +138,11 @@ class OrderItem(models.Model):
         verbose_name='מוצר'
     )
 
-    # האם זו מנה משודרגת (כמו אסאדו)
     is_premium = models.BooleanField(
         default=False,
         verbose_name='מנה משודרגת'
     )
 
-    # כמה תוספת למנה (לסועד אחד) בזמן ההזמנה
     extra_price_per_person = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -174,10 +164,7 @@ class OrderItem(models.Model):
 
     @property
     def extra_subtotal(self):
-        """
-        כמה כסף פריט זה מוסיף להזמנה (תוספת בלבד):
-        guests_count * extra_price_per_person
-        """
+
         if not self.order or not self.order.guests_count:
             return Decimal('0.00')
         guests = Decimal(self.order.guests_count)
@@ -185,13 +172,6 @@ class OrderItem(models.Model):
 
 
 class OrderAddon(models.Model):
-    """
-    תוספת שנבחרה בהזמנה ספציפית.
-
-    דוגמאות:
-    - "שתייה קלה" – pricing_type='per_person' → price_snapshot * guests_count * quantity
-    - "מלצרים" – pricing_type='fixed' → price_snapshot * quantity
-    """
 
     order = models.ForeignKey(
         Order,
@@ -241,7 +221,7 @@ class OrderAddon(models.Model):
 
     def calculate_subtotal(self) -> Decimal:
         """
-        מחשב subtotal לפי סוג התמחור:
+        Calculate subtotal by pricing type:
         - fixed: price_snapshot * quantity
         - per_person: price_snapshot * guests_count * quantity
         """

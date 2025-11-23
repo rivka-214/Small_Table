@@ -9,17 +9,6 @@ from .permissions import IsReviewOwnerVendorOrAdmin
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """
-    ניהול חוות דעת:
-    - list:
-        * כולם יכולים לראות חוות דעת פומביות (is_public=True)
-        * ספק רואה את כל החוות דעת עליו
-        * לקוח רואה חוות דעת שלו + פומביות
-    - create:
-        * רק משתמש מחובר, ועל הזמנה ששייכת לו
-    - update/destroy:
-        * בעל החוות דעת או admin
-    """
 
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsReviewOwnerVendorOrAdmin]
@@ -34,11 +23,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         user = self.request.user
         qs = Review.objects.select_related('user', 'vendor', 'order', 'order__package')
 
-        # משתמש אנונימי – רואה רק פומבי
         if not user.is_authenticated:
             return qs.filter(is_public=True)
 
-        # admin
         has_admin_role = getattr(user, 'user_roles', None) and user.user_roles.filter(
             role__name='admin'
         ).exists()
@@ -46,11 +33,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if user.is_staff or user.is_superuser or has_admin_role:
             return qs
 
-        # ספק – רואה כל מה שנכתב עליו
         if hasattr(user, 'vendor_profile'):
             return qs.filter(vendor=user.vendor_profile)
 
-        # לקוח – רואה פומבי + מה שהוא כתב בעצמו
         return qs.filter(
             models.Q(is_public=True) | models.Q(user=user)
         ).distinct()

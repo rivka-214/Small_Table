@@ -8,10 +8,9 @@ from orders.models import Order
 
 class Review(models.Model):
     """
-    חוות דעת של לקוח על ספק, מבוססת על הזמנה קיימת.
-    - רק מי שביצע הזמנה יכול להשאיר חוות דעת.
+    A customer review of a supplier, based on an existing order.
+    - Only those who have placed an order can leave a review.
     """
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

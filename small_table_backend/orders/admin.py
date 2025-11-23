@@ -7,7 +7,7 @@ from packages.models import PackageCategory
 
 class OrderItemInline(admin.TabularInline):
     """
-    עריכת פריטי הזמנה מתוך מסך ההזמנה.
+    Edit order items from the order screen.
     """
     model = OrderItem
     extra = 0
@@ -22,9 +22,9 @@ class OrderItemInline(admin.TabularInline):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """
-        סינון דינמי:
-        - package_category: רק קטגוריות של החבילה שנבחרה
-        - product: אפשר לסנן לפי ספק אם רוצים (כאן פתוח לכל המוצרים)
+        Dynamic filtering:
+        - package_category: Only categories of the selected package
+        - product: You can filter by supplier if you want (here open to all products)
         """
         if not hasattr(request, 'resolver_match') or not request.resolver_match:
             return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -41,7 +41,7 @@ class OrderItemInline(admin.TabularInline):
                 pass
 
         if db_field.name == "product" and object_id:
-            # אם רוצים להגביל למוצרים של ספק ההזמנה:
+
             try:
                 order = Order.objects.get(id=object_id)
                 kwargs["queryset"] = Product.objects.filter(

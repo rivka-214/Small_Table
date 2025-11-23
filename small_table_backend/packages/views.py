@@ -15,12 +15,11 @@ from .permissions import IsPackageOwnerOrAdmin
 
 class PackageViewSet(viewsets.ModelViewSet):
     """
-    ViewSet לניהול חבילות:
-    - list/retrieve: כולם יכולים לראות חבילות פעילות
-    - create: רק ספק מחובר (או admin)
-    - update/destroy: בעל החבילה או admin
+    ViewSet for managing packages:
+    - list/retrieve: everyone can see active packages
+    - create: only connected provider (or admin)
+    - update/destroy: package owner or admin
     """
-
     queryset = Package.objects.select_related('vendor', 'vendor__user').all()
     serializer_class = PackageSerializer
 
@@ -54,10 +53,10 @@ class PackageViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """
-        הרשאות דינמיות:
-        - list, retrieve: קריאה חופשית (עם סינון is_active)
-        - my_packages: ספק מחובר בלבד
-        - create/update/partial_update/destroy: ספק בעלים או admin
+        Dynamic permissions:
+        - list, retrieve: free read (with is_active filtering)
+        - my_packages: only for logged in users
+        - create/update/partial_update/destroy: only for owner or admin
         """
         if self.action in ['list', 'retrieve']:
             permission_classes = [IsAuthenticatedOrReadOnly]
@@ -72,8 +71,8 @@ class PackageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        - admin/staff רואים את כל החבילות
-        - משתמש רגיל: רואה רק חבילות is_active=True
+        - admin/staff see all packages
+        - regular user: sees only packages is_active=True
         """
         qs = super().get_queryset()
         user = self.request.user
@@ -89,10 +88,7 @@ class PackageViewSet(viewsets.ModelViewSet):
         return qs.filter(is_active=True)
 
     def create(self, request, *args, **kwargs):
-        """
-        יצירת חבילה:
-        - ספק חייב להיות מחובר
-        """
+
         user = request.user
         if not user.is_authenticated:
             return Response(
@@ -110,9 +106,7 @@ class PackageViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my_packages(self, request):
-        """
-        רשימת החבילות של הספק המחובר
-        """
+
         user = request.user
         if not hasattr(user, 'vendor_profile'):
             return Response(
@@ -127,8 +121,8 @@ class PackageViewSet(viewsets.ModelViewSet):
 
 class PackageCategoryViewSet(viewsets.ModelViewSet):
     """
-    ניהול קטגוריות בתוך חבילה
-    (בד"כ ישמש במסכי ניהול ספק, פחות לציבור)
+    Manage categories within a package
+    (Usually used in vendor management screens, less for the public)
     """
     queryset = PackageCategory.objects.select_related('package', 'package__vendor').all()
     serializer_class = PackageCategorySerializer
@@ -141,7 +135,7 @@ class PackageCategoryViewSet(viewsets.ModelViewSet):
 
 class PackageCategoryItemViewSet(viewsets.ModelViewSet):
     """
-    ניהול פריטים בתוך קטגוריות של חבילה
+    Managing items within package categories
     """
     queryset = PackageCategoryItem.objects.select_related(
         'package_category',

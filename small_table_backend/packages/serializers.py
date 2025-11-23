@@ -5,9 +5,8 @@ from .models import Package, PackageCategory, PackageCategoryItem
 
 class PackageCategoryItemSerializer(serializers.ModelSerializer):
     """
-    Serializer לפריט בקטגוריה בתוך חבילה
+    Serializer for an item in a category within a package
     """
-
     product_name = serializers.CharField(
         source='product.name',
         read_only=True
@@ -31,8 +30,8 @@ class PackageCategoryItemSerializer(serializers.ModelSerializer):
 
 class PackageCategorySerializer(serializers.ModelSerializer):
     """
-    Serializer לקטגוריה בתוך חבילה
-    כולל את הפריטים שלה (read-only)
+    Serializer for a category within a package
+    including its items (read-only)
     """
 
     items = PackageCategoryItemSerializer(many=True, read_only=True)
@@ -54,10 +53,7 @@ class PackageCategorySerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def validate(self, attrs):
-        """
-        ולידציה לוגית:
-        - min_select לא גדול מ-max_select (אם הוגדר)
-        """
+
         min_select = attrs.get('min_select', getattr(self.instance, 'min_select', None))
         max_select = attrs.get('max_select', getattr(self.instance, 'max_select', None))
 
@@ -71,11 +67,10 @@ class PackageCategorySerializer(serializers.ModelSerializer):
 
 class PackageSerializer(serializers.ModelSerializer):
     """
-    Serializer לחבילה
-    - מציג גם קטגוריות ופריטים (קריאה בלבד)
-    - שדה vendor נלקח מהספק המחובר (בספק רגיל)
+    Serializer for package
+    - Also shows categories and items (read only)
+    - vendor field taken from connected vendor (in standard vendor)
     """
-
     vendor_name = serializers.CharField(
         source='vendor.business_name',
         read_only=True
@@ -106,10 +101,7 @@ class PackageSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def validate(self, attrs):
-        """
-        ולידציה לוגית לחבילה:
-        - min_guests לא גדול מ-max_guests (אם מוגדר)
-        """
+
         min_guests = attrs.get('min_guests', getattr(self.instance, 'min_guests', None))
         max_guests = attrs.get('max_guests', getattr(self.instance, 'max_guests', None))
 
@@ -121,11 +113,7 @@ class PackageSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        """
-        יצירת חבילה:
-        - ספק רגיל: vendor נלקח מ-request.user.vendor_profile
-        - admin: יכול לשלוח vendor ידנית
-        """
+
         request = self.context.get('request')
         user = getattr(request, 'user', None)
 

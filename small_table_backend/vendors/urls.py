@@ -4,8 +4,7 @@ from .views import VendorProfileViewSet
 
 router = DefaultRouter()
 
-# רישום ה-ViewSet תחת הנתיב 'vendors'
-# basename מאפשר ל-Django לזהות את ה-ViewSet בשם ייחודי
+
 router.register(
     r'vendors',                    # הנתיב ב-URL
     VendorProfileViewSet,          # ה-ViewSet שיטפל בבקשות

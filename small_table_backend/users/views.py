@@ -9,9 +9,9 @@ from .serializers import UserSerializer, RoleSerializer, UserRoleSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    ניהול משתמשים:
+    User Management:
     - JWTAuthentication
-    - אפשר חיפוש/מיון לפי שם, מייל ותאריך הצטרפות
+    - Enable search/sort by name, email and join date
     """
 
     queryset = User.objects.all()
@@ -27,12 +27,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class RoleViewSet(viewsets.ModelViewSet):
     """
-    ניהול תפקידים:
-    בפועל – בדרך כלל רק אדמין יגע בזה,
-    אבל כרגע ההרשאה הכללית היא IsAuthenticated
-    (אפשר לשדרג בהמשך ל- IsAdminUser ).
+    Role Management:
+    In practice – usually only an admin would touch this
+    , but currently the general permission is IsAuthenticated
     """
-
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
     authentication_classes = [JWTAuthentication]
@@ -46,11 +44,10 @@ class RoleViewSet(viewsets.ModelViewSet):
 
 class UserRoleViewSet(viewsets.ModelViewSet):
     """
-    שיוך תפקידים למשתמשים:
-    משתמשים אחרים בקוד (כמו הרשאות של Packages / Orders)
-    עובדים מול user.user_roles, ולכן חשוב שהמודל הזה יישאר.
+    Assigning roles to users:
+    Other users in the code (such as Packages / Orders permissions)
+    work against user.user_roles, so it is important that this model remains.
     """
-
     queryset = UserRole.objects.select_related("user", "role")
     serializer_class = UserRoleSerializer
     authentication_classes = [JWTAuthentication]

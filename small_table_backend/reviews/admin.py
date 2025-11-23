@@ -5,7 +5,7 @@ from .models import Review
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     """
-    ניהול חוות דעת בממשק האדמין.
+    Manage reviews in the admin interface.
     """
 
     list_display = [

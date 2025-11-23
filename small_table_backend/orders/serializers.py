@@ -7,8 +7,8 @@ from packages.models import PackageCategoryItem
 
 class OrderItemSerializer(serializers.ModelSerializer):
     """
-    פריט הזמנה – בחירת מנה מחבילה.
-    (כמו קודם, רק בלי כמות – כי הכמות היא לפי מספר סועדים)
+    Order item – choosing a dish from a package.
+    (As before, only without quantity – because the quantity is according to the number of diners)
     """
 
     product_name = serializers.CharField(source='product.name', read_only=True)
@@ -42,9 +42,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderAddonSerializer(serializers.ModelSerializer):
     """
-    תוספת בהזמנה:
-    - בצד הלקוח שולחים addon + quantity.
-    - השרת ממלא price_snapshot ו-subtotal.
+    Add-on to order:
+    - On the client side, addon + quantity is sent.
+    - The server fills in price_snapshot and subtotal.
     """
 
     addon_name = serializers.CharField(source='addon.name', read_only=True)
@@ -79,19 +79,7 @@ class OrderAddonSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     """
-    Serializer להזמנה:
-
-    ביצירה:
-    - קלט:
-      * package (חובה)
-      * guests_count
-      * note (אופציונלי)
-      * items: רשימת בחירות של (package_category, product)
-      * addons: רשימת בחירות של (addon, quantity)
-    - מחושב אוטומטית:
-      * user מתוך request
-      * vendor מתוך package.vendor
-      * total_price לפי הפורמולה
+    Serializer Oreder:
     """
 
     user_name = serializers.CharField(source='user.username', read_only=True)
@@ -133,10 +121,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        """
-        ולידציה בסיסית:
-        - לא ניתן להזמין חבילה שאיננה פעילה (אם קיים is_active).
-        """
+
         package = attrs.get('package') or getattr(self.instance, 'package', None)
         if package and hasattr(package, 'is_active') and not package.is_active:
             raise serializers.ValidationError("לא ניתן להזמין חבילה שאיננה פעילה.")
@@ -144,22 +129,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        """
-        יצירת הזמנה חדשה:
-
-        1. מוציאים מתוך הנתונים את items + addons.
-        2. קובעים user מתוך request.
-        3. vendor נלקח מתוך package.vendor.
-        4. יוצרים Order.
-        5. עבור כל item:
-           - בודקים שהקטגוריה שייכת לחבילה.
-           - מוצאים PackageCategoryItem.
-           - שומרים is_premium + extra_price_per_person.
-        6. עבור כל addon:
-           - שומרים price_snapshot = addon.price.
-           - subtotal מחושב במודל OrderAddon.
-        7. מעדכנים total_price על בסיס הכל.
-        """
 
         request = self.context.get('request')
         user = getattr(request, 'user', None)
@@ -169,21 +138,19 @@ class OrderSerializer(serializers.ModelSerializer):
 
         package = validated_data['package']
 
-        # קביעת הספק מהחבילה
+
         validated_data['vendor'] = package.vendor
 
         if user and user.is_authenticated:
             validated_data['user'] = user
 
-        # יצירת ההזמנה עצמה
+
         order = Order.objects.create(**validated_data)
 
-        # --- יצירת פריטי ההזמנה (מפותחות מהחבילה) ---
         for item_data in items_data:
             package_category = item_data['package_category']
             product = item_data['product']
 
-            # ודאות שהקטגוריה שייכת לחבילה שבחרו
             if package_category.package_id != package.id:
                 raise serializers.ValidationError(
                     f"קטגוריה {package_category.id} לא שייכת לחבילה שנבחרה."
@@ -208,7 +175,6 @@ class OrderSerializer(serializers.ModelSerializer):
                 extra_price_per_person=pci.extra_price_per_person,
             )
 
-        # --- יצירת תוספות להזמנה (OrderAddon) ---
         for addon_data in addons_data:
             addon = addon_data['addon']
             quantity = addon_data.get('quantity', 1)
@@ -220,20 +186,11 @@ class OrderSerializer(serializers.ModelSerializer):
                 price_snapshot=addon.price,
             )
 
-        # --- חישוב סכום כולל ---
         order.update_total_price(save=True)
         return order
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        """
-        עדכון הזמנה קיימת:
-
-        כרגע:
-        - לא משנים חבילה, ספק או user.
-        - אפשר לעדכן guests_count, note, status.
-        - items ו-addons לא מתעדכנים כאן (אפשר להוסיף בהמשך אם תרצי).
-        """
 
         validated_data.pop('items', None)
         validated_data.pop('addons', None)

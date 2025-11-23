@@ -28,8 +28,8 @@ class UserRoleSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """
-    - יוצר/מעדכן user כולל הצפנת סיסמה
-    - roles: רשימת id-ים של Role
+    - Creates/updates user including password encryption
+    - roles: list of Role ids
     """
 
     roles = serializers.PrimaryKeyRelatedField(

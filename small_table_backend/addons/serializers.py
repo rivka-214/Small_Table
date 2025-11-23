@@ -5,10 +5,9 @@ from .models import AddonCategory, Addon
 
 class AddonCategorySerializer(serializers.ModelSerializer):
     """
-    Serializer לקטגוריית תוספות.
-    בד"כ מנוהל ע"י מנהל המערכת.
+    Serializer for the add-on category.
+    Usually managed by the system administrator.
     """
-
     class Meta:
         model = AddonCategory
         fields = [
@@ -30,11 +29,10 @@ class AddonCategorySerializer(serializers.ModelSerializer):
 
 class AddonSerializer(serializers.ModelSerializer):
     """
-    תוספת בחבילה:
-    - ספק מגדיר: package, category, name, price, pricing_type, is_included
-    - לקוח רק קורא.
+    Package addition:
+    - Vendor defines: package, category, name, price, pricing_type, is_included
+    - Client only reads.
     """
-
     package_name = serializers.CharField(source='package.name', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
 
@@ -68,9 +66,5 @@ class AddonSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        """
-        כאן אפשר להוסיף בעתיד:
-        - בדיקה שהחבילה פעילה
-        - בדיקה שהקטגוריה פעילה
-        """
+
         return attrs

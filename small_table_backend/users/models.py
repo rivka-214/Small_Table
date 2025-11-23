@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 class Role(models.Model):
     """
-    טבלת תפקידים במערכת (customer, vendor, admin וכו')
+    System Role Table (customer, vendor, admin, etc.)
     """
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True, null=True)
@@ -21,14 +21,13 @@ class Role(models.Model):
 
 class User(AbstractUser):
     """
-    משתמש מורחב:
-    - מבוסס על AbstractUser
-    - מוסיף טלפון
-    - קשר N-N לתפקידים דרך UserRole
+    Extended User:
+    - Based on AbstractUser
+    - Adds phone
+    - N-N relationship to roles via UserRole
     """
     phone = models.CharField(max_length=20, blank=True, null=True)
 
-    # חשוב: זה שדה לוגי בלבד, ה-through הוא UserRole למטה
     roles = models.ManyToManyField(
         Role,
         through="UserRole",
@@ -42,12 +41,11 @@ class User(AbstractUser):
 
 class UserRole(models.Model):
     """
-    טבלת קישור בין Users ל-Roles
-    מאפשרת:
-    - למשתמש להיות עם כמה תפקידים
-    - לשמור תאריך שיוך
+    A link table between Users and Roles
+    allows:
+    - A user to have multiple roles
+    - Save an association date
     """
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

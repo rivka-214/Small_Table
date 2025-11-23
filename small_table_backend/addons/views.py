@@ -9,11 +9,10 @@ from .permissions import IsAdminOrReadOnly, IsAddonOwnerOrAdmin
 
 class AddonCategoryViewSet(viewsets.ModelViewSet):
     """
-    ניהול קטגוריות תוספות:
-    - list/retrieve: קריאה (אפשר גם ללא התחברות, אם תרחיבי בהמשך)
-    - create/update/delete: רק admin/staff/superuser
+    Manage add-on categories:
+    - list/retrieve: read
+    - create/update/delete: admin/staff/superuser only
     """
-
     queryset = AddonCategory.objects.all()
     serializer_class = AddonCategorySerializer
 
@@ -33,18 +32,14 @@ class AddonCategoryViewSet(viewsets.ModelViewSet):
 
 class AddonViewSet(viewsets.ModelViewSet):
     """
-    ניהול תוספות של חבילות:
+    Manage package add-ons:
 
     - list/retrieve:
-        * לקוח רואה רק תוספות is_active=True
-        * ספק רואה רק תוספות של החבילות שלו
-        * admin רואה הכל
+    * Customer only sees add-ons is_active=True
+    * Provider only sees add-ons of their packages
+    * admin sees everything
 
-    - create/update/destroy:
-        * admin – הכל
-        * ספק – רק תוספות של החבילות שלו
     """
-
     serializer_class = AddonSerializer
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

@@ -46,12 +46,8 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """
-        בחירת הרשאות דינמית לפי פעולה:
-        - list / retrieve: כולם יכולים לקרוא (קריאה בלבד)
-        - become: רק משתמש מחובר
-        - update / partial_update / destroy: רק בעלים או מנהל
-        - ברירת מחדל: משתמש מחובר
-        """
+        Dynamic permission selection by action:
+     """
         if self.action in ['list', 'retrieve']:
             permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -62,15 +58,14 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, IsVendorOwnerOrAdmin]
 
         else:
-            # ברירת מחדל – דורש התחברות
             permission_classes = [IsAuthenticated]
 
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         """
-        מנהלים רואים את כל הספקים.
-        משתמשים רגילים רואים רק ספקים מאושרים (is_active=True).
+        Admins see all providers.
+        Regular users only see approved providers (is_active=True).
         """
         queryset = super().get_queryset()
         user = self.request.user
@@ -95,12 +90,6 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def become(self, request):
-        """
-        פעולה לוגית: 'הפוך לספק'
-        - משתמש מחובר שולח פרטי עסק
-        - נוצר עבורו VendorProfile חדש במצב is_active=False
-        - אם כבר קיים לו ספק – נחזיר שגיאה
-        """
         user = request.user
 
         # אם כבר יש לו VendorProfile – לא ניצור שוב
@@ -110,7 +99,6 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # שולפים רק את שדות העסק מהבקשה (לא user ולא is_active)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

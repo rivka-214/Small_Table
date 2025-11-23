@@ -8,8 +8,8 @@ from packages.models import Package
 
 class AddonCategory(models.Model):
     """
-    קטגוריית תוספות (שתייה, חד"פ, מלצרים וכו').
-    גלובלית לכל המערכת – בד"כ מנוהלת ע"י מנהל מערכת.
+    Category of additions (drinks, food, waiters, etc.).
+    Global for the entire system – usually managed by a system administrator.
     """
 
     name = models.CharField(
@@ -50,17 +50,10 @@ class AddonCategory(models.Model):
 
 class Addon(models.Model):
     """
-    תוספת בחבילה מסוימת.
-
-    דוגמאות:
-    - "שתייה קלה" – מחיר פר סועד
-    - "מלצרים" – מחיר קבוע להזמנה
-    - "חד"פ יוקרתי" – פר סועד
-
-    החיבור ל-ORDER מתבצע דרך טבלת OrderAddons (באפליקציית ההזמנות),
-    שמשתמשת ב-addon הזה ובפונקציה calculate_price_for_guests().
+    An add-on in a specific package.
+    The connection to ORDER is made through the OrderAddons table (in the Orders app),
+    which uses this addon and the calculate_price_for_guests() function.
     """
-
     PRICING_FIXED = 'fixed'
     PRICING_PER_PERSON = 'per_person'
 
@@ -133,10 +126,10 @@ class Addon(models.Model):
 
     def calculate_price_for_guests(self, guests_count: int) -> Decimal:
         """
-        חישוב תרומת התוספת למחיר לפי מספר סועדים:
+        Calculation of the contribution of the additional price according to the number of diners:
 
-        - fixed       → מחיר קבוע להזמנה (price)
-        - per_person  → price * guests_count
+        - fixed → fixed price per order (price)
+        - per_person → price * guests_count
         """
         guests = Decimal(guests_count or 0)
 

@@ -4,9 +4,7 @@ from vendors.models import VendorProfile
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    """
-    ממיר בין אובייקט Product (פייתון) ל-JSON (API)
-    """
+
     vendor = serializers.PrimaryKeyRelatedField(queryset=VendorProfile.objects.all())
     vendor_name = serializers.CharField(source='vendor.business_name', read_only=True)
 

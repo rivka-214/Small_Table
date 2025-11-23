@@ -3,12 +3,11 @@ from rest_framework import permissions
 
 class IsOrderOwnerOrVendorOrAdmin(permissions.BasePermission):
     """
-    הרשאה להזמנה:
-    - לקוח: רואה/מעדכן רק את ההזמנות שלו (ללא שינוי סטטוס)
-    - ספק: רואה/מעדכן הזמנות ששייכות אליו (יכול לשנות סטטוס)
-    - admin (role 'admin' או staff/superuser): רואה הכל
-    """
-
+Order Permission:
+- Customer: Sees/updates only his orders (no status change)
+- Supplier: Sees/updates orders belonging to him (can change status)
+- admin (role 'admin' or staff/superuser): Sees everything
+"""
     def has_object_permission(self, request, view, obj):
         user = request.user
 
@@ -39,12 +38,11 @@ class IsOrderOwnerOrVendorOrAdmin(permissions.BasePermission):
 
 class IsOrderAddonOwnerOrVendorOrAdmin(permissions.BasePermission):
     """
-    הרשאה לפריטי OrderAddon:
-    - admin: הכל
-    - ספק: יכול לקרוא/לערוך תוספות להזמנות שלו
-    - לקוח: יכול רק לראות תוספות בהזמנות שלו (לא לערוך)
+    Permission for OrderAddon items:
+    - admin: All
+    - Vendor: Can read/edit add-ons to their orders
+    - Customer: Can only view add-ons to their orders (not edit)
     """
-
     def has_object_permission(self, request, view, obj):
         user = request.user
 
@@ -60,11 +58,11 @@ class IsOrderAddonOwnerOrVendorOrAdmin(permissions.BasePermission):
         if has_admin_role or user.is_staff or user.is_superuser:
             return True
 
-        # לקוח – רק קריאה
+
         if order.user == user:
             return request.method in permissions.SAFE_METHODS
 
-        # ספק שייך להזמנה – יכול לערוך
+
         if hasattr(user, 'vendor_profile') and order.vendor == user.vendor_profile:
             return True
 

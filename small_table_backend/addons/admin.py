@@ -6,7 +6,7 @@ from .models import AddonCategory, Addon
 @admin.register(AddonCategory)
 class AddonCategoryAdmin(admin.ModelAdmin):
     """
-    ניהול קטגוריות תוספות
+   Manage add-on categories
     """
 
     list_display = [
@@ -47,9 +47,8 @@ class AddonCategoryAdmin(admin.ModelAdmin):
 @admin.register(Addon)
 class AddonAdmin(admin.ModelAdmin):
     """
-    ניהול תוספות בחבילות
+    Managing add-ons in packages
     """
-
     list_display = [
         'name',
         'package',

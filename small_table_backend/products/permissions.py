@@ -2,30 +2,17 @@ from rest_framework import permissions
 
 
 class IsVendorOwnerOrReadOnly(permissions.BasePermission):
-    """
-    כללים:
-    ========
-      כולם:           GET (קריאה) - כל המוצרים זמינים לצפייה
-      מנהל (admin):    הכל על כולם
-      ספק-בעלים:      יכול לערוך/למחוק רק את המוצרים שלו
-      משתמש רגיל:     GET בלבד
-    """
+
 
     def has_permission(self, request, view):
-        """
-        בדיקה ברמת ה-View (לפני גישה לאובייקט ספציפי)
-        """
+
         if request.method in permissions.SAFE_METHODS:
             return True
 
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        """
-        בדיקה ברמת אובייקט ספציפי (מוצר)
 
-        obj = Product instance
-        """
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -53,13 +40,10 @@ class IsVendorOwnerOrReadOnly(permissions.BasePermission):
 
 class IsVendorOwner(permissions.BasePermission):
     """
-    הרשאה מחמירה יותר - רק הבעלים (או מנהל) יכול לגשת
+    Stricter permission - only the owner (or administrator) can access
     """
-
     def has_object_permission(self, request, view, obj):
-        """
-        רק הבעלים או מנהל
-        """
+
         if not request.user or not request.user.is_authenticated:
             return False
 
@@ -77,21 +61,20 @@ class IsVendorOwner(permissions.BasePermission):
 
 class IsVendor(permissions.BasePermission):
     """
-    בדיקה שהמשתמש הוא ספק (יש לו VendorProfile)
+    Check that the user is a vendor (has a VendorProfile)
 
-    שימוש: ליצירת מוצרים חדשים
+    Usage: to create new products
     """
-
     message = "רק ספקים רשומים יכולים לבצע פעולה זו"
 
     def has_permission(self, request, view):
         """
-        בדיקה שהמשתמש מחובר והוא ספק
+        Checking that the user is logged in and is a provider
         """
         if not request.user or not request.user.is_authenticated:
             return False
 
-        # בדיקה שיש לו VendorProfile
+
         try:
             vendor_profile = request.user.vendor_profile
             return vendor_profile.is_active

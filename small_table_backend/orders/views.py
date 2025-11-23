@@ -10,12 +10,11 @@ from .permissions import IsOrderOwnerOrVendorOrAdmin, IsOrderAddonOwnerOrVendorO
 
 class OrderViewSet(viewsets.ModelViewSet):
     """
-    ניהול הזמנות:
-    - לקוח: רואה רק את ההזמנות שלו
-    - ספק: רואה רק הזמנות אליו (vendor)
-    - admin: רואה הכל
+    Order Management:
+    - Customer: Sees only their own orders
+    - Supplier: Sees only orders to them (vendor)
+    - Admin: Sees everything
     """
-
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated, IsOrderOwnerOrVendorOrAdmin]
 
@@ -32,7 +31,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             role__name='admin'
         ).exists()
 
-        # admin רואה הכל
         if user.is_staff or user.is_superuser or has_admin_role:
             return Order.objects.select_related('user', 'vendor', 'package') \
                 .prefetch_related('items', 'addons')
@@ -44,27 +42,20 @@ class OrderViewSet(viewsets.ModelViewSet):
             ).select_related('user', 'vendor', 'package') \
              .prefetch_related('items', 'addons')
 
-        # לקוח – רואה רק שלו
         return Order.objects.filter(
             user=user
         ).select_related('user', 'vendor', 'package') \
          .prefetch_related('items', 'addons')
 
     def perform_create(self, serializer):
-        """
-        user מגיע מה-request.
-        vendor מחושב ב-serializer מתוך package.
-        """
+
         serializer.save()
 
 
 class OrderAddonViewSet(viewsets.ModelViewSet):
     """
-    ניהול תוספות שנבחרו בהזמנה (OrderAddon):
-    - לקוח: רואה רק תוספות בהזמנות שלו (קריאה בלבד).
-    - ספק: רואה/מעדכן תוספות בהזמנות השייכות אליו.
-    - admin: הכל.
-    """
+    Managing add-ons selected in an order (OrderAddon):
+ """
 
     queryset = OrderAddon.objects.select_related(
         'order',

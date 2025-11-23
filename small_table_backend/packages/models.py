@@ -6,8 +6,8 @@ from products.models import Product
 
 class Package(models.Model):
     """
-    חבילה שספק מציע ללקוחות
-    לדוגמה: בסיסית / קלאסית / יוקרתית
+    A package that a provider offers to customers
+For example: basic / classic / luxury
     """
 
     vendor = models.ForeignKey(
@@ -79,9 +79,9 @@ class Package(models.Model):
 
 class PackageCategory(models.Model):
     """
-    קטגוריה בתוך חבילה
-    לדוגמה: סלטים, מנות עיקריות, קינוחים
-    """
+    Category within a package
+For example: Salads, Main Dishes, Desserts
+     """
 
     package = models.ForeignKey(
         Package,
@@ -139,9 +139,9 @@ class PackageCategory(models.Model):
 
 class PackageCategoryItem(models.Model):
     """
-    פריט (מנה) בקטגוריה בתוך חבילה
-    מחבר בין Product לבין PackageCategory
-    """
+    Item (item) in a category within a package
+Connects Product and PackageCategory
+   """
 
     package_category = models.ForeignKey(
         PackageCategory,

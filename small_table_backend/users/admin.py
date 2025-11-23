@@ -7,7 +7,7 @@ from .models import User, Role, UserRole
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
     """
-    אפשר להציג roles כ-readonly list, אבל לא בתוך fieldsets.
+    You can display roles as a read-only list, but not within fieldsets.
     """
 
     fieldsets = DjangoUserAdmin.fieldsets + (
@@ -16,7 +16,6 @@ class UserAdmin(DjangoUserAdmin):
         }),
     )
 
-    # לא ניתן להשתמש ב-filter_horizontal בגלל through model
     readonly_fields = []
 
     list_display = ('username', 'email', 'phone', 'is_staff')
