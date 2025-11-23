@@ -7,9 +7,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # users & auth
+    # small_table/urls.py
     path('api/', include('users.urls')),
-    path('api/', include('roles.urls')),
-    path('api/', include('user_roles.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 

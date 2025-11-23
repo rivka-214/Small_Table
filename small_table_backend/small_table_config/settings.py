@@ -46,8 +46,7 @@ INSTALLED_APPS = [
     'reviews',
     'qna',
     'api',
-    'roles',  
-     'user_roles',
+
     'corsheaders',
     'rest_framework',
     'django_filters',
