@@ -10,13 +10,7 @@ from .permissions import IsVendorOwnerOrAdmin
 
 
 class VendorProfileViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet לניהול פרופילי ספקים:
-    - לקוחות רגילים רואים רק ספקים פעילים
-    - מנהלים רואים את כולם
-    - ספק יכול לערוך רק את עצמו
-    - הרשמה כספק נעשית דרך /vendors/become/
-    """
+
 
     queryset = VendorProfile.objects.select_related('user').all()
     serializer_class = VendorProfileSerializer

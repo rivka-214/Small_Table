@@ -26,10 +26,38 @@ class UserRoleSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "assigned_at"]
 
 
+class RegisterSerializer(serializers.ModelSerializer):
+    """
+    סיריאלייזר להרשמת משתמש חדש.
+    פתוח לכולם – בלי roles, בלי is_staff.
+    """
+
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "phone",
+            "password",
+        ]
+        read_only_fields = ["id"]
+
+    def create(self, validated_data):
+        password = validated_data.pop("password", None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
-    - Creates/updates user including password encryption
-    - roles: list of Role ids
+    - יצירה/עדכון user כולל הצפנת סיסמה
+    - roles: רשימת Role ids (שולט באדמין דרך ההרשאות)
     """
 
     roles = serializers.PrimaryKeyRelatedField(
@@ -50,8 +78,9 @@ class UserSerializer(serializers.ModelSerializer):
             "phone",
             "roles",
         ]
+        read_only_fields = ["id", "is_staff", "is_active"]
         extra_kwargs = {
-            "password": {"write_only": True},
+            "password": {"write_only": True, "required": False},
         }
 
     def create(self, validated_data):

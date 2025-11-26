@@ -18,9 +18,8 @@ class ProductAdmin(admin.ModelAdmin):
         ('פרטי מוצר בסיסיים', {
             'fields': ('vendor', 'product_name', 'description')
         }),
-        ('תמחור וזמינות', {
-            'fields': ('base_price_per_person', 'is_available')
-        }),
+
+
         ('מדיה', {
             'fields': ('image',)
         }),
