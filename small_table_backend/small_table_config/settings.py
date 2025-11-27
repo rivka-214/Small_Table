@@ -39,7 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # הורדנו את WhiteNoise בשלב זה כדי שלא יפיל את השרת לוקאלית
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -54,7 +54,7 @@ ROOT_URLCONF = 'small_table_config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],   # ← חשוב
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,7 +73,6 @@ WSGI_APPLICATION = 'small_table_config.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
     )
 }
 
@@ -94,10 +93,7 @@ USE_TZ = True
 # STATIC + MEDIA
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# כרגע לא מגדירים STATICFILES_DIRS ולא משתמשים ב-WhiteNoise כדי שלא יהיו אזהרות/שגיאות
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

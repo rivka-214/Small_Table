@@ -7,26 +7,39 @@ class Role(models.Model):
     """
     System Role Table (customer, vendor, admin, etc.)
     """
-    name = models.CharField(max_length=50, unique=True)
+
+    CUSTOMER = "customer"
+    VENDOR = "vendor"
+    ADMIN = "admin"
+
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Stable internal code: customer/vendor/admin/etc."
+    )
+    name = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Display name (can be translated)"
+    )
     description = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = "תפקיד"
         verbose_name_plural = "תפקידים"
-        ordering = ["name"]
+        ordering = ["code"]
 
     def __str__(self):
         return self.name
 
 
 class User(AbstractUser):
-    """
-    Extended User:
-    - Based on AbstractUser
-    - Adds phone
-    - N-N relationship to roles via UserRole
-    """
-    phone = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="מספר טלפון ליצירת קשר"
+    )
 
     roles = models.ManyToManyField(
         Role,
@@ -61,7 +74,12 @@ class UserRole(models.Model):
     class Meta:
         verbose_name = "שיוך תפקיד למשתמש"
         verbose_name_plural = "שיוכי תפקידים למשתמשים"
-        unique_together = ("user", "role")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "role"],
+                name="unique_user_role",
+            )
+        ]
 
     def __str__(self):
         return f"{self.user.username} → {self.role.name}"

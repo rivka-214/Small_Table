@@ -12,7 +12,7 @@ class UserAdmin(DjangoUserAdmin):
 
     fieldsets = DjangoUserAdmin.fieldsets + (
         ('פרטים נוספים', {
-            'fields': ('phone','roles'),
+            'fields': ('phone',),
         }),
     )
 
