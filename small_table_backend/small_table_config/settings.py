@@ -6,6 +6,11 @@ from pathlib import Path
 import os
 import dj_database_url
 
+# ✅ ייבוא Cloudinary
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-not-for-production")
@@ -18,7 +23,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+
+    # ✅ חשוב: cloudinary_storage לפני staticfiles
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+
+    # ✅ אפליקציית Cloudinary
+    'cloudinary',
 
     # apps
     'users',
@@ -96,7 +107,16 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # כרגע לא מגדירים STATICFILES_DIRS ולא משתמשים ב-WhiteNoise כדי שלא יהיו אזהרות/שגיאות
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# ✅ הגדרות Cloudinary – משתמשות ב־ENV שהגדרת ברנדר
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# ✅ כל ImageField / FileField ישתמשו ב-Cloudinary (לא בשמירה לדיסק)
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # DRF settings
